@@ -1,0 +1,28 @@
+{
+  "name": "deskspot-booking-portal",
+  "version": "1.0.0",
+  "description": "Desk and meeting room booking portal built for the DeskSpot junior web developer assignment.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test",
+    "test:rules": "node --test tests/rules.test.js",
+    "lint": "node --check server.js && node --check public/app.js && node --check booking-rules.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.0"
+  }
+}

@@ -1,0 +1,22 @@
+services:
+  deskspot:
+    build: .
+    container_name: deskspot-app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-local-compose-change-this-secret-before-deployment}
+      DB_PATH: /app/data/deskspot.sqlite
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+    volumes:
+      - deskspot-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  deskspot-data:
