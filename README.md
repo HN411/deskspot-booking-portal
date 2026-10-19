@@ -1,315 +1,271 @@
-# DeskSpot — Desk & Meeting Room Booking Portal
+# DeskSpot --- Desk & Meeting Room Booking Portal
 
-DeskSpot is a small full-stack workspace booking application for hybrid teams. Employees can find and reserve desks or meeting rooms, while administrators manage offices, spaces, and daily occupancy.
+**Live application:**
+https://deskspot-booking-portal-production.up.railway.app\
+**Assignment:** Joiner Web Dev Assignment --- DeskSpot
 
-> **Assignment status:** The local application, source code, tests, Docker configuration, CI workflow, and documentation are included. The live URL, hosted environment, final CI run, work-board link, pull-request history, and demo recording must be completed by the person submitting the assignment. Do not claim these are complete until you have verified them.
+DeskSpot is a web application for employees to find and book office
+desks or meeting rooms. Office administrators manage offices and spaces
+and oversee bookings.
 
-## Contents
+## 1. Main Features
 
-- [Features](#features)
-- [Technology stack](#technology-stack)
-- [Requirements](#requirements)
-- [Run locally](#run-locally)
-- [Demo accounts](#demo-accounts)
-- [Run with Docker Compose](#run-with-docker-compose)
-- [Tests and code checks](#tests-and-code-checks)
-- [Environment variables](#environment-variables)
-- [API overview](#api-overview)
-- [Deploy to Railway](#deploy-to-railway)
-- [Security notes](#security-notes)
-- [Assumptions and trade-offs](#assumptions-and-trade-offs)
-- [Architecture](#architecture)
-- [Architecture decision records](#architecture-decision-records)
-- [Assignment delivery checklist](#assignment-delivery-checklist)
-- [What I would improve next](#what-i-would-improve-next)
+-   Register and log in.
+-   Browse offices, desks, and meeting rooms.
+-   Search availability by office, date, time, and space type.
+-   Create bookings and view personal bookings.
+-   Cancel eligible future bookings.
+-   Admin tools for managing offices and spaces.
+-   Validate booking time slots, office hours, availability, and room
+    capacity.
+-   Responsive interface for desktop and mobile screens.
 
-## Features
+> Verify each feature in the live application before the review and
+> update this list if anything is not implemented.
 
-### Authentication and roles
+## 2. Technology
 
-- Employee registration and login.
-- Password hashing with bcrypt.
-- JWT authentication with an eight-hour expiry.
-- Generic invalid-login responses and rate limiting on login.
-- Authorization checks on protected server routes. Public registration creates an employee account; users cannot choose their own admin role.
+-   **Backend:** Node.js and Express
+-   **Frontend:** HTML, CSS, and JavaScript
+-   **Database:** SQLite (`better-sqlite3`)
+-   **Authentication:** Token-based authentication
+-   **Deployment:** Railway
+-   **Container support:** Docker and Docker Compose
 
-### Offices, spaces, and booking
-
-- Admin-only create, update, and deactivate operations for offices and spaces.
-- Office fields include name, city, and IANA time zone.
-- Space fields include name, type (desk or room), capacity, and active status.
-- Availability search by office, date, time range, and space type.
-- Server-side validation for booking rules:
-  - Bookings align to 30-minute slots.
-  - Office-local booking times must fall within 08:00–20:00.
-  - Bookings can be made no more than 14 days ahead.
-  - An employee may have at most two active desk bookings per local day.
-  - Room attendee count cannot exceed room capacity.
-  - An active space cannot have overlapping bookings.
-- Times are stored as UTC timestamps and displayed using the office's local time zone.
-- Employees can view their bookings and cancel their own future bookings.
-- Admins can view daily office occupancy and cancel any booking with a required reason. The cancellation reason is visible in the booking history.
-- A lightweight seven-day usage indicator is included.
-
-### Interface and delivery
-
-- Responsive interface with a left-side navigation area and mobile navigation.
-- Labeled forms, validation feedback, loading/empty states, and status messages.
-- Health-check endpoint, Dockerfile, Docker Compose configuration, GitHub Actions CI workflow, seed data, unit tests, and API integration tests.
-- OpenAPI JSON document at `/api/openapi.json`.
-
-## Technology stack
-
-- **Frontend:** HTML, CSS, and browser JavaScript.
-- **Backend:** Node.js 20+ and Express.
-- **Database:** SQLite using `better-sqlite3`.
-- **Authentication:** bcryptjs and JSON Web Tokens.
-- **Security and quality:** Helmet, login rate limiting, Node.js test runner, and Supertest.
-- **Deployment packaging:** Docker and Docker Compose.
-- **CI:** GitHub Actions.
-
-This stack is intentionally small so a junior developer can explain the request flow, validation rules, database access, and authorization without needing a large framework.
-
-## Requirements
-
-- Node.js 20 or newer and npm for local development.
-- Git for source control.
-- Optional: Docker Desktop or Docker Engine for container-based development.
-- A GitHub account and a hosting account for cloud deployment.
-
-## Run locally
-
-1. Clone the repository or extract the project ZIP.
-2. Open a terminal in the directory containing `package.json`.
-3. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-4. Copy `.env.example` to `.env` and set a unique `JWT_SECRET`. For local development, `DB_PATH=./data/deskspot.sqlite` is suitable.
-5. Start the server:
-
-   ```bash
-   npm start
-   ```
-
-6. Open [http://localhost:3000](http://localhost:3000).
-
-The application creates its SQLite database and inserts seed data when the database has not yet been initialized. The default database file is `data/deskspot.sqlite`.
-
-For development with automatic restart, use:
-
-```bash
-npm run dev
-```
-
-To reset local demo data, stop the server and delete `data/deskspot.sqlite`. The application will initialize the database and seed data again on its next start. **Only do this when you are happy to delete local bookings and other changes.**
-
-## Demo accounts
-
+## 3.Demo accounts
 These accounts are for local evaluation only.
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@deskspot.local` | `Admin123!` |
-| Employee | `employee@deskspot.local` | `Employee123!` |
-| Employee | `sam@deskspot.local` | `Employee123!` |
+Role	Email	Password
+Admin	admin@deskspot.local	Admin123!
+Employee	employee@deskspot.local	Employee123!
 
-Change or disable demo accounts before exposing the application publicly. Do not use these passwords for real users. The live environment should use a strong, unique secret and appropriate production credentials.
+## 4. Live Application
 
-## Run with Docker Compose
+Open: **https://deskspot-booking-portal-production.up.railway.app**
 
-Docker Desktop or Docker Engine must be running first.
+The hosting service may take a short time to wake after inactivity. If
+the application does not open, check the Railway deployment status and
+logs.
 
-1. Create a `.env` file from `.env.example` and replace the example secret.
-2. In the project root, run:
+## 5. Run Locally
 
-   ```bash
-   docker compose up --build
-   ```
+### Requirements
 
-3. Open [http://localhost:3000](http://localhost:3000).
-4. Stop the app with `Ctrl+C`, or run `docker compose down` in another terminal.
+-   Node.js and npm
+-   Git (optional, for cloning the repository)
 
-Compose stores the database in the named `deskspot-data` volume. To remove that volume and its data, run `docker compose down -v` only when you intentionally want to reset the database.
+### Setup
 
-If Docker Desktop cannot start, run DeskSpot locally with Node.js using the previous section; Docker commands will not work until the Docker engine is running.
+1.  Clone the repository and open its folder:
 
-## Tests and code checks
+    ``` bash
+    git clone <YOUR_GITHUB_REPOSITORY_URL>
+    cd <PROJECT_FOLDER>
+    ```
 
-Run the linter/syntax checks and automated tests before pushing changes:
+2.  Install dependencies:
 
-```bash
+    ``` bash
+    npm install
+    ```
+
+3.  Create a local `.env` file if the application requires environment
+    variables. Do not commit this file.
+
+    Example values (use the names expected by the application):
+
+    ``` env
+    NODE_ENV=development
+    PORT=3000
+    JWT_SECRET=replace-with-a-long-random-secret
+    DB_PATH=./data/deskspot.sqlite
+    ```
+
+4.  Start the application:
+
+    ``` bash
+    npm start
+    ```
+
+5.  Open the local address printed in the terminal. It is commonly
+    `http://localhost:3000`.
+
+If the project uses different scripts or environment-variable names,
+check `package.json` and the server configuration.
+
+## 6. Run with Docker
+
+If Docker Desktop is installed and running, and the repository contains
+`docker-compose.yml`, run:
+
+``` bash
+docker compose up --build
+```
+
+Open the local address configured by the project. Press `Ctrl+C` to stop
+the running process; use `docker compose down` to stop and remove the
+containers.
+
+For SQLite, keep the database in a persistent mounted directory. In
+Railway, the database path and storage configuration must match the
+deployed application. A container's temporary filesystem should not be
+treated as permanent database storage.
+
+## 7. Tests and Code Checks
+
+Run the scripts defined in `package.json`. If these scripts are
+available, use:
+
+``` bash
 npm run lint
 npm test
 ```
 
-To run only the booking-rule unit tests:
+Resolve failures before submitting. Do not report tests as passing
+unless they have been run successfully.
 
-```bash
-npm run test:rules
-```
+## 8. Main Booking Rules
 
-The included tests cover core booking rules and API scenarios, including authentication/authorization, booking conflicts, ownership, and admin cancellation with a saved reason. The GitHub Actions workflow runs installation, checks, tests, and a Docker build on pushes and pull requests to `main`.
+The application is designed around the assignment's core rules:
 
-A successful local test run does not replace checking the Actions result in GitHub. Open the repository's **Actions** tab and confirm that the workflow for the final commit passes.
+-   A space must not have overlapping active bookings.
+-   Bookings use 30-minute slots.
+-   Bookings must fall within office local working hours, 08:00--20:00.
+-   Employees can book no more than 14 days ahead.
+-   Employees may hold at most two active desk bookings per day.
+-   Room bookings must not exceed room capacity.
+-   Employees can cancel their own eligible future bookings.
+-   Administrators can manage office spaces and bookings according to
+    their permissions.
+-   Each office has its own time zone; times should display in that
+    office's local time.
 
-## Environment variables
+These rules should be enforced on the server, not only by frontend
+validation.
 
-| Variable | Purpose | Example / default |
-|---|---|---|
-| `PORT` | HTTP port supplied by the local environment or hosting platform | `3000` locally |
-| `JWT_SECRET` | Secret used to sign authentication tokens | Set a unique random value; never commit it |
-| `DB_PATH` | SQLite database file path | `./data/deskspot.sqlite` locally; `/app/data/deskspot.sqlite` in the provided container setup |
-| `NODE_ENV` | Runtime environment | `development` locally, `production` when hosted |
-| `APP_ORIGIN` | Optional CORS allowlist for API clients | `http://localhost:3000` locally; configure for your actual deployed origin if needed |
+## 9. Environment Variables
 
-The hosting platform's injected `PORT` should be respected. The SQLite database path must point to persistent storage in a hosted environment if data needs to survive restarts and redeployments.
+Set variables in your local `.env` file or in Railway's environment
+settings.
 
-## API overview
+  Variable       Purpose
+  -------------- -----------------------------------------------------
+  `NODE_ENV`     Runtime mode, such as `development` or `production`
+  `PORT`         Port used by the web server, if configurable
+  `JWT_SECRET`   Secret used to sign authentication tokens
+  `DB_PATH`      Location of the SQLite database file
 
-Protected routes use the header `Authorization: Bearer <token>`. Error responses use a consistent JSON shape such as `{ "error": "...", "details": [] }` where applicable.
+The names and defaults must match the code. Keep secrets out of Git and
+never use the example secret in production.
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `POST` | `/api/auth/register` | Public; creates an employee account |
-| `POST` | `/api/auth/login` | Public; rate limited |
-| `GET` | `/api/auth/me` | Authenticated |
-| `GET` | `/api/offices` | Authenticated |
-| `POST`, `PUT`, `DELETE` | `/api/offices` and `/api/offices/:id` | Admin |
-| `GET` | `/api/offices/:id/spaces` | Authenticated |
-| `GET` | `/api/spaces` | Authenticated |
-| `POST`, `PUT`, `DELETE` | `/api/spaces` and `/api/spaces/:id` | Admin |
-| `GET` | `/api/availability?officeId=&date=&from=&to=&type=` | Authenticated |
-| `POST` | `/api/bookings` | Authenticated employee |
-| `GET` | `/api/bookings/me` | Authenticated |
-| `DELETE` | `/api/bookings/:id` | Booking owner or admin; admin cancellation requires a reason |
-| `GET` | `/api/admin/occupancy?officeId=&date=` | Admin |
-| `GET` | `/api/admin/stats` | Admin |
-| `GET` | `/api/health` | Public health check |
-| `GET` | `/api/openapi.json` | Public OpenAPI document |
+## 10. API Overview
 
-Expected HTTP status codes include `400` for invalid input, `401` for unauthenticated requests, `403` for forbidden actions, `404` for missing resources, and `409` for booking conflicts.
+The assignment's expected API includes routes similar to these:
 
-## Deploy to Railway
+  ---------------------------------------------------------------------------
+  Method                  Endpoint                    Purpose
+  ----------------------- --------------------------- -----------------------
+  `POST`                  `/api/auth/register`        Register an account
 
-This section is a deployment guide; a public URL is **not** created by this README. Complete the steps in your own hosting account and then add the actual URL below.
+  `POST`                  `/api/auth/login`           Log in
 
-1. Push the project to a GitHub repository. Make sure `.env` and local database files are not committed.
-2. Sign in at [Railway](https://railway.com/) and create a project from your GitHub repository.
-3. Select the repository and deploy the service using the included `Dockerfile` at the repository root.
-4. Add a persistent volume to the service mounted at `/app/data`.
-5. Configure the service variables:
+  `GET`                   `/api/offices`              List offices
 
-   | Variable | Value |
-   |---|---|
-   | `NODE_ENV` | `production` |
-   | `JWT_SECRET` | A new, long, random secret generated for production |
-   | `DB_PATH` | `/app/data/deskspot.sqlite` |
+  `GET`                   `/api/offices/:id/spaces`   List spaces in an
+                                                      office
 
-6. Allow the platform to provide its `PORT` value. Do not hard-code a conflicting port in the hosting dashboard.
-7. Deploy/redeploy the service and inspect the build and runtime logs.
-8. Generate a public domain in the service's networking settings.
-9. Open the public domain and test login, availability search, booking, overlapping-booking rejection, admin cancellation, and the `/api/health` endpoint.
-10. Restart or redeploy the service and confirm that existing data remains available.
+  `GET`                   `/api/availability`         Search available spaces
 
-**SQLite deployment note:** the database must be written inside the mounted persistent volume. Confirm that `DB_PATH` is honored by the running application and that the directory is writable by the container user. Do not use an ephemeral container filesystem for the production database. SQLite is appropriate for this small single-instance assignment; for multi-instance production deployment, migrate to PostgreSQL and add a database-level concurrency guard for overlapping bookings.
+  `POST`                  `/api/bookings`             Create a booking
 
-### Deployment details to fill in before submission
+  `GET`                   `/api/bookings/me`          List the signed-in
+                                                      user's bookings
 
-- **Live application URL:** `ADD_YOUR_REAL_DEPLOYED_URL_HERE`
-- **Health check URL:** `ADD_YOUR_REAL_URL_HERE/api/health`
-- **GitHub repository:** `ADD_YOUR_REPOSITORY_URL_HERE`
-- **CI run:** `ADD_THE_FINAL_GREEN_ACTIONS_RUN_URL_HERE`
-- **Work board:** `ADD_YOUR_BOARD_URL_HERE`
-- **Demo recording:** `ADD_YOUR_DEMO_LINK_HERE`
+  `DELETE`                `/api/bookings/:id`         Cancel a booking when
+                                                      authorized
 
-Replace each placeholder with a real, working link before submitting. If an item is not complete, state that honestly rather than inventing a URL.
+  `GET`                   `/api/admin/occupancy`      View office occupancy,
+                                                      if implemented
+  ---------------------------------------------------------------------------
 
-## Security notes
+Confirm the actual routes in the source code before using them. This
+table reflects the assignment's expected API shape; not every route is
+guaranteed to exist in the deployed version.
 
-- Never commit `.env`, production secrets, real user credentials, or the SQLite database.
-- Use a unique production `JWT_SECRET`; changing it invalidates existing tokens.
-- Replace or disable demo accounts before public use.
-- Keep dependencies updated and review GitHub security alerts.
-- Configure CORS only for the intended frontend origin if a separate frontend origin is used.
-- Use HTTPS for public deployments.
-- Back up persistent database data before upgrades or resets.
-- This is an assignment-sized application, not a security-reviewed production system.
+## 11. Security
 
-## Assumptions and trade-offs
+-   Store passwords as secure hashes, never as plain text.
+-   Check authentication and role permissions on the server for
+    protected routes.
+-   Prevent users from viewing or cancelling another employee's bookings
+    by changing an ID.
+-   Validate input on the server and use parameterized database queries.
+-   Store production secrets in Railway environment settings, not in
+    source control.
+-   Do not publish real user passwords or private production credentials
+    in this README.
 
-- A booking is one continuous interval on one local calendar date. Overnight bookings are not supported because the office closes at 20:00.
-- A desk is for one person. Rooms accept attendee counts from one through the configured capacity.
-- Public registration always creates an employee account. Admin access is not self-assigned during registration.
-- The application stores UTC timestamps and also retains office-local date/time values for local display and day-based rules.
-- Booking writes use a synchronous SQLite transaction so requests handled by a single application process serialize the overlap check and insert. This is not a multi-instance database-level guarantee.
-- The seven-day usage indicator is a lightweight booking-count estimate, not a true seat-hour occupancy percentage.
-- Email notifications, recurring bookings, live availability updates, and end-to-end browser tests are not implemented in this version. Treat them as future work, not completed functionality.
+## 12. Assumptions and Trade-offs
 
-## Architecture
+-   The application is intended as a small internal booking portal and
+    assignment submission.
+-   Office hours are interpreted in each office's local time zone.
+-   Bookings that meet exactly at an end/start boundary do not overlap.
+-   SQLite keeps local setup simple. For a multi-instance production
+    system, a managed database such as PostgreSQL would be a better
+    choice.
+-   Free hosting can sleep after inactivity. SQLite data may not persist
+    unless hosting provides persistent storage and the database is
+    configured to use it.
+-   Use test accounts and seed data for demonstrations, not real
+    employee data.
 
-```text
-Browser (HTML / CSS / JavaScript)
-              |
-              | same-origin HTTP / JSON
-              v
-        Express REST API
-        |       |       |
-        |       |       +-- Authentication and role checks
-        |       +---------- Booking rules and time-zone handling
-        +------------------ SQLite data access
-                              |
-                              v
-                      data/deskspot.sqlite
-```
+## 13. Architecture Decision Records
 
-Key files:
+The assignment asks for at least two short Architecture Decision Records
+(ADRs). If these files exist in the repository, see
+[`docs/adr/`](docs/adr/).
 
-- `server.js` — Express application, REST endpoints, authentication/authorization, database setup, seed data, and error handling.
-- `booking-rules.js` — isolated booking validation and time-zone utilities.
-- `public/index.html` — frontend page structure.
-- `public/styles.css` — responsive styling and navigation layout.
-- `public/app.js` — browser-side state and API interactions.
-- `tests/rules.test.js` — booking-rule unit tests.
-- `tests/api.test.js` — API integration tests.
-- `Dockerfile` and `docker-compose.yml` — container build and local orchestration.
-- `.github/workflows/ci.yml` — automated checks on GitHub.
-- `docs/adr/` — architecture decision records.
-- `docs/WORK_BOARD.md` — starter checklist for tracking assignment tasks.
+Suggested decisions to document: 1. **Application stack:** why
+Node.js/Express, a simple frontend, and SQLite were selected. 2.
+**Booking conflicts and time handling:** how overlapping bookings are
+checked and how office-local time is represented.
 
-## Architecture decision records
+Only document decisions that match the actual code.
 
-- [ADR 0001 — Stack selection](docs/adr/0001-stack.md)
-- [ADR 0002 — Booking conflict prevention](docs/adr/0002-booking-conflicts.md)
+## 14. What I Would Do Next
 
-## Assignment delivery checklist
+-   Use a managed PostgreSQL database for reliable production
+    persistence.
+-   Add or expand integration tests for successful bookings, conflicts,
+    and forbidden access.
+-   Add an end-to-end test for the main booking journey.
+-   Add an OpenAPI/Swagger API description if it is not already
+    available.
+-   Add occupancy reporting and notifications where they are not yet
+    implemented.
+-   Configure CI to run lint and tests on every push and pull request.
+-   Record a short demo showing employee booking and administrator
+    workflows.
+-   Maintain a work board and small pull requests to show the
+    development process.
 
-- [x] Responsive frontend with left navigation, labeled forms, and feedback states.
-- [x] Registration, login, hashed passwords, expiring tokens, and server-side role checks.
-- [x] Office and space management for admins.
-- [x] Availability search and server-side booking validation.
-- [x] Employee booking history and future-booking cancellation.
-- [x] Admin daily occupancy and cancellation with a reason.
-- [x] Relational SQLite data model, indexes, and seed data.
-- [x] Booking-rule unit tests and API integration test suite included.
-- [x] Dockerfile, Docker Compose, and GitHub Actions workflow included.
-- [x] README and two architecture decision records included.
-- [ ] Run the final CI pipeline and confirm it passes.
-- [ ] Deploy and verify a public live URL.
-- [ ] Add real repository, board, CI, and demo links above.
-- [ ] Record a 3–5 minute demo or arrange a live review.
+## 15. Final Submission Checklist
 
-## What I would improve next
+-   [ ] The live URL opens.
+-   [ ] The Git repository is accessible to the reviewer.
+-   [ ] Local setup works using these instructions.
+-   [ ] Lint and tests have been run and their results are known.
+-   [ ] Admin and employee demo accounts are available and shared
+    securely.
+-   [ ] At least two ADRs are present under `docs/adr`.
+-   [ ] CI has a successful run on the submitted commit.
+-   [ ] The demo video or live-demo plan is ready.
 
-1. Move to PostgreSQL and enforce non-overlapping bookings at database level for safe multi-instance operation.
-2. Add request/response schema validation and a browsable Swagger UI for the OpenAPI document.
-3. Add Playwright end-to-end tests for employee booking and admin cancellation.
-4. Add real email delivery or a notification outbox, audit logging, and token revocation.
-5. Calculate occupancy from available and occupied 30-minute intervals and paginate larger admin lists.
-6. Add recurring bookings and real-time availability only after the core booking flow is stable.
+------------------------------------------------------------------------
 
-## License
+**Live URL:** https://deskspot-booking-portal-production.up.railway.app
 
-No license has been specified. Add a license file if you intend to publish or redistribute this project under explicit terms.
+*Keep this README aligned with the actual code and deployment. Update
+any route, feature, test, or setup detail that differs from the current
+project.*
